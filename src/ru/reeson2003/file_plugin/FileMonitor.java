@@ -14,9 +14,9 @@ import java.text.SimpleDateFormat;
  */
 public class FileMonitor implements Parameter, Runnable{
     private volatile File file = null;
-    private Integer requestPeriod = 0;
+    private volatile Integer requestPeriod = 0;
     private String name = "no file";
-    private String value = "";
+    private volatile String value = "";
     private String configuration = "no file";
     private volatile boolean requestStatus = false;
 
@@ -54,7 +54,7 @@ public class FileMonitor implements Parameter, Runnable{
     }
 
     public void setRequestPeriod(Integer requestPeriod) {
-        if(requestPeriod > 0) {
+        if(requestPeriod != null && requestPeriod > 0) {
             this.requestPeriod = requestPeriod;
         } else {
             this.requestPeriod = 0;
