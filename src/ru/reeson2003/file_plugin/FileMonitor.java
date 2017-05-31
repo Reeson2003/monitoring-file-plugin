@@ -1,6 +1,8 @@
 package ru.reeson2003.file_plugin;
 
 
+import ru.reeson2003.Parameter;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 
@@ -10,41 +12,78 @@ import java.text.SimpleDateFormat;
  *
  * @author Pavel Gavrilov.
  */
-public class FileMonitor implements Runnable{
-    private ParameterImpl parameter;
+public class FileMonitor implements Parameter, Runnable{
     private volatile File file = null;
-    private volatile Integer requestPeriod;
-    private volatile boolean isMonitoring;
+    private Integer requestPeriod = 0;
+    private String name = "no file";
+    private String value = "";
+    private String configuration = "no file";
+    private volatile boolean requestStatus = false;
 
-    public FileMonitor(ParameterImpl parameter) {
-        this.parameter = parameter;
-    }
 
-    public void setFilePath(String filePath) {
+    private void setFilePath(String filePath) {
         file = new File(filePath);
         if(file.isFile())
-            parameter.changeName(file.getName());
+            this.name = file.getName();
         else {
-            parameter.changeName("Файл не найден");
+            this.name = "no file";
             file = null;
         }
 
     }
 
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String s) {}
+
+    @Override
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public void setValue(String s) {}
+
+    @Override
+    public Integer getRequestPeriod() {
+        return requestPeriod;
+    }
+
     public void setRequestPeriod(Integer requestPeriod) {
         if(requestPeriod > 0) {
             this.requestPeriod = requestPeriod;
-            parameter.changeReqestedPeriod(requestPeriod);
         } else {
-            this.requestPeriod = null;
-            parameter.changeReqestedPeriod(0);
+            this.requestPeriod = 0;
         }
     }
 
-    public void setMonitoring(boolean monitoring) {
-        isMonitoring = monitoring;
-        parameter.changeRequestStatus(monitoring);
-        if(isMonitoring) {
+    @Override
+    public boolean getRequestStatus() {
+        return requestStatus;
+    }
+
+    @Override
+    public void setRequestStatus(boolean requestStatus) {
+        setMonitoring(requestStatus);
+    }
+
+    @Override
+    public String getConfiguration() {
+        return configuration;
+    }
+
+    @Override
+    public void setConfiguration(String configuration) {
+        setFilePath(configuration);
+    }
+
+    private void setMonitoring(boolean monitoring) {
+        requestStatus = monitoring;
+        if(requestStatus) {
             Thread thread = new Thread(this);
             thread.setDaemon(true);
             thread.start();
@@ -53,10 +92,9 @@ public class FileMonitor implements Runnable{
 
     @Override
     public void run() {
-        while (isMonitoring) {
+        while (requestStatus) {
             if (file != null) {
-                String s = getLastModified();
-                parameter.setValue(s);
+                value = getLastModified();
                 try {
                     Thread.sleep(requestPeriod * 1000);
                 } catch (InterruptedException e) {
@@ -66,9 +104,8 @@ public class FileMonitor implements Runnable{
         }
     }
 
-    public String getLastModified() {
+    private String getLastModified() {
         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-        String lastModified = sdf.format(file.lastModified());
-        return lastModified;
+        return sdf.format(file.lastModified());
     }
 }

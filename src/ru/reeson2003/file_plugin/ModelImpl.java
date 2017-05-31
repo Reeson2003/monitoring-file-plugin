@@ -4,6 +4,7 @@ import ru.reeson2003.Model;
 import ru.reeson2003.Parameter;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ import java.util.List;
  */
 public class ModelImpl implements Model {
     private String moduleName = "File Plugin";
-    private Parameter parameter = new ParameterImpl();
+    private Parameter parameter = new FileMonitor();
     @Override
     public String getModuleName() {
         return moduleName;
@@ -22,11 +23,21 @@ public class ModelImpl implements Model {
 
     @Override
     public List<Parameter> getParameters() {
-        return Arrays.asList(parameter);
+        return Collections.singletonList(parameter);
     }
 
     @Override
     public Parameter getParameter(String s) {
         return parameter;
+    }
+
+    @Override
+    public void addParameter(String s) {
+
+    }
+
+    @Override
+    public void removeParameter(String s) {
+
     }
 }
